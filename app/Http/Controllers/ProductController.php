@@ -7,9 +7,29 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Product::all(), 200);
+        $query = Product::query();
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where('name', 'like', "%{$searchTerm}%")
+                ->orWhere('description', 'like', "%{$searchTerm}%");
+        }
+
+        if ($request->has('low_stock')) {
+            $query->where('quantity', '<', $request->input('low_stock'));
+        }
+
+        if ($request->has('sort_by') && $request->has('order')) {
+            $sortBy = $request->input('sort_by');
+            $order = $request->input('order');
+            $query->orderBy($sortBy, $order);
+        }
+
+        $products = $query->paginate($request->input('per_page', 10));
+
+        return response()->json($products, 200);
     }
 
     public function store(Request $request)
