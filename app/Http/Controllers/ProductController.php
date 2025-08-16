@@ -29,17 +29,24 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::find($id);
+
         if (!$product) {
-            return response()->json(['message' => 'Produto não encontrado'], 404);
+            return response()->json([
+                'message' => 'Product not found.'
+            ], 404);
         }
+
         return response()->json($product, 200);
     }
 
     public function update(Request $request, $id)
     {
         $product = Product::find($id);
+
         if (!$product) {
-            return response()->json(['message' => 'Produto não encontrado'], 404);
+            return response()->json([
+                'message' => 'Product not found.'
+            ], 404);
         }
 
         $data = $request->validate([
@@ -50,16 +57,24 @@ class ProductController extends Controller
         ]);
 
         $product->update($data);
+
         return response()->json($product, 200);
     }
 
     public function destroy($id)
     {
         $product = Product::find($id);
+
         if (!$product) {
-            return response()->json(['message' => 'Produto não encontrado'], 404);
+            return response()->json([
+                'message' => 'Product not found.'
+            ], 404);
         }
+
         $product->delete();
-        return response()->json(['message' => 'Produto deletado com sucesso'], 200);
+
+        return response()->json([
+            'message' => 'Product deleted successfully'
+        ], 200);
     }
 }
