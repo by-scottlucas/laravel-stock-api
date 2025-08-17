@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
@@ -20,4 +21,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('products/{id}/stock/in', [StockMovementController::class, 'stockIn']);
     Route::post('products/{id}/stock/out', [StockMovementController::class, 'stockOut']);
+
+    Route::apiResource('categories', CategoryController::class);
 });

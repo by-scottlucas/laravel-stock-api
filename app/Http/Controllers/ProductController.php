@@ -3,13 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Product::query()->with('category');
+
+        if ($request->has('category')) {
+            $categoryName = $request->input('category');
+            $category = Category::where('name', $categoryName)->first();
+
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
 
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
@@ -39,7 +50,13 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
+            'category_name' => 'nullable|string|max:255',
         ]);
+
+        if ($request->has('category_name') && $request->input('category_name')) {
+            $category = Category::firstOrCreate(['name' => $request->input('category_name')]);
+            $data['category_id'] = $category->id;
+        }
 
         $product = Product::create($data);
 
@@ -48,12 +65,10 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::find($id);
+        $product = Product::with('category')->find($id);
 
         if (!$product) {
-            return response()->json([
-                'message' => 'Product not found.'
-            ], 404);
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
         return response()->json($product, 200);
@@ -65,7 +80,7 @@ class ProductController extends Controller
 
         if (!$product) {
             return response()->json([
-                'message' => 'Product not found.'
+                'message' => 'Product not found'
             ], 404);
         }
 
@@ -74,7 +89,19 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'quantity' => 'integer|min:0',
             'price' => 'numeric|min:0',
+            'category_name' => 'nullable|string|max:255',
         ]);
+
+        if ($request->has('category_name')) {
+            if ($request->input('category_name')) {
+                $category = Category::firstOrCreate([
+                    'name' => $request->input('category_name')
+                ]);
+                $data['category_id'] = $category->id;
+            } else {
+                $data['category_id'] = null;
+            }
+        }
 
         $product->update($data);
 
@@ -87,7 +114,7 @@ class ProductController extends Controller
 
         if (!$product) {
             return response()->json([
-                'message' => 'Product not found.'
+                'message' => 'Product not found'
             ], 404);
         }
 
