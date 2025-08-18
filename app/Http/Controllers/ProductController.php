@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\ProductCollection;
 
 class ProductController extends Controller
 {
@@ -40,7 +42,7 @@ class ProductController extends Controller
 
         $products = $query->paginate($request->input('per_page', 10));
 
-        return response()->json($products, 200);
+        return new ProductCollection($products);
     }
 
     public function store(Request $request)
@@ -60,7 +62,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        return response()->json($product, 201);
+        return (new ProductResource($product))->response()->setStatusCode(201);
     }
 
     public function show($id)
@@ -68,10 +70,12 @@ class ProductController extends Controller
         $product = Product::with('category')->find($id);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return response()->json([
+                'message' => 'Product not found'
+            ], 404);
         }
 
-        return response()->json($product, 200);
+        return new ProductResource($product);
     }
 
     public function update(Request $request, $id)
@@ -105,7 +109,7 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        return response()->json($product, 200);
+        return new ProductResource($product);
     }
 
     public function destroy($id)
