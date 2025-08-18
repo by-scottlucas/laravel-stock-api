@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -20,7 +21,7 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
-        return response()->json($user, 201);
+        return (new UserResource($user))->response()->setStatusCode(201);
     }
 
     public function login(Request $request)
@@ -41,8 +42,17 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'token' => $token
+            'accessToken' => $token,
+            '_links' => [
+                'logout' => route('auth.logout'),
+                'me' => route('auth.me'),
+            ]
         ], 200);
+    }
+
+    public function me(Request $request)
+    {
+        return new UserResource($request->user());
     }
 
     public function logout(Request $request)
@@ -50,7 +60,10 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Logged out successfully.'
+            'message' => 'Logged out successfully.',
+            '_links' => [
+                'login' => route('auth.login')
+            ]
         ], 200);
     }
 }
