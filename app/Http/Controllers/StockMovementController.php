@@ -6,13 +6,16 @@ use App\Models\Product;
 use App\Models\StockMovement;
 use App\Enums\MovementTypeEnum;
 use Illuminate\Http\Request;
+use App\Http\Resources\StockMovementResource;
+use App\Http\Resources\StockMovementCollection;
+use App\Http\Resources\ProductResource;
 
 class StockMovementController extends Controller
 {
-
     public function index()
     {
-        return response()->json(StockMovement::all(), 200);
+        $movements = StockMovement::all();
+        return new StockMovementCollection($movements);
     }
 
     public function show($id)
@@ -24,7 +27,7 @@ class StockMovementController extends Controller
             ], 404);
         }
 
-        return response()->json($movement, 200);
+        return new StockMovementResource($movement);
     }
 
     public function stockIn(Request $request, $productId)
@@ -52,10 +55,7 @@ class StockMovementController extends Controller
             'reason' => $data['reason'] ?? 'Purchase',
         ]);
 
-        return response()->json([
-            'message' => 'Stock-in registered successfully.',
-            'product' => $product
-        ], 200);
+        return new ProductResource($product);
     }
 
     public function stockOut(Request $request, $productId)
@@ -89,10 +89,7 @@ class StockMovementController extends Controller
             'reason' => $data['reason'] ?? 'Sale',
         ]);
 
-        return response()->json([
-            'message' => 'Stock-out registered successfully.',
-            'product' => $product
-        ], 200);
+        return new ProductResource($product);
     }
 
     public function destroy($id)

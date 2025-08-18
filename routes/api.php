@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\StockMovementController;
 
 Route::post(
@@ -33,16 +33,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource(
         'products/stock/movements',
         StockMovementController::class
-    )->only(['index', 'show', 'destroy']);
+    )->only(
+            ['index', 'show', 'destroy']
+        )->names([
+                'index' => "stock-movements.index",
+                'show' => "stock-movements.show",
+                'destroy' => "stock-movements.destroy",
+            ]);
 
     Route::post(
         'products/{id}/stock/in',
         [StockMovementController::class, 'stockIn']
-    );
+    )->name('stock-movements.stock-in');
     Route::post(
         'products/{id}/stock/out',
         [StockMovementController::class, 'stockOut']
-    );
+    )->name('stock-movements.stock-out');
 
     Route::apiResource(
         'categories',
