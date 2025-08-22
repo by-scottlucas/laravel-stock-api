@@ -20,10 +20,18 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ];
 
-        $response = $this->postJson(route('auth.register'), $userData);
+        $response = $this->postJson(
+            route('auth.register'),
+            $userData
+        );
 
         $response->assertStatus(201);
-        $this->assertDatabaseHas('users', ['email' => $userData['email']]);
+        $this->assertDatabaseHas(
+            'users',
+            [
+                'email' => $userData['email']
+            ]
+        );
     }
 
     public function test_should_not_register_a_user_with_invalid_credentials()
@@ -34,10 +42,19 @@ class AuthControllerTest extends TestCase
             'password' => '123',
         ];
 
-        $response = $this->postJson(route('auth.register'), $userData);
+        $response = $this->postJson(
+            route('auth.register'),
+            $userData
+        );
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['name', 'email', 'password']);
+            ->assertJsonValidationErrors(
+                [
+                    'name',
+                    'email',
+                    'password'
+                ]
+            );
     }
 
     public function test_should_not_register_a_user_with_existing_email()
@@ -50,7 +67,10 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ];
 
-        $response = $this->postJson(route('auth.register'), $userData);
+        $response = $this->postJson(
+            route('auth.register'),
+            $userData
+        );
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -67,10 +87,18 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ];
 
-        $response = $this->postJson(route('auth.login'), $credentials);
+        $response = $this->postJson(
+            route('auth.login'),
+            $credentials
+        );
 
         $response->assertStatus(200)
-            ->assertJsonStructure(['accessToken', '_links']);
+            ->assertJsonStructure(
+                [
+                    'accessToken',
+                    '_links'
+                ]
+            );
     }
 
     public function test_should_not_login_a_user_with_invalid_credentials()
@@ -84,7 +112,10 @@ class AuthControllerTest extends TestCase
             'password' => 'invalid-password',
         ];
 
-        $response = $this->postJson(route('auth.login'), $credentials);
+        $response = $this->postJson(
+            route('auth.login'),
+            $credentials
+        );
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -97,7 +128,10 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ];
 
-        $response = $this->postJson(route('auth.login'), $credentials);
+        $response = $this->postJson(
+            route('auth.login'),
+            $credentials
+        );
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -107,16 +141,21 @@ class AuthControllerTest extends TestCase
     public function test_should_logout_an_authenticated_user_and_revoke_token()
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user, [], 'sanctum');
+        Sanctum::actingAs($user);
 
-        $response = $this->postJson(route('auth.logout'));
+        $response = $this->postJson(
+            route('auth.logout')
+        );
 
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Logged out successfully.',
             ]);
 
-        $this->assertCount(0, $user->tokens()->get());
+        $this->assertCount(
+            0,
+            $user->tokens()->get()
+        );
     }
 
     public function test_should_allow_authenticated_user_to_access_own_profile()
@@ -136,7 +175,9 @@ class AuthControllerTest extends TestCase
 
     public function test_should_not_allow_unauthenticated_user_to_access_me_endpoint()
     {
-        $response = $this->getJson(route('auth.me'));
+        $response = $this->getJson(
+            route('auth.me')
+        );
 
         $response->assertStatus(401);
     }

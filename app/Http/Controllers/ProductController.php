@@ -21,6 +21,8 @@ class ProductController extends Controller
 
             if ($category) {
                 $query->where('category_id', $category->id);
+            } else {
+                $query->whereRaw('1 = 0');
             }
         }
 
